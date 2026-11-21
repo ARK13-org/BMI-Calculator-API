@@ -1,99 +1,213 @@
 # BMI Calculator API
 
-FastAPI backend for the BMI Calculator Flutter application.
+A RESTful backend for a BMI (Body Mass Index) Calculator application, built with **FastAPI** and **SQLAlchemy**. It provides user authentication, BMI measurement tracking, health statistics, goal management, and personalized settings.
 
 ## Features
 
-- JWT authentication (register/login/current user)
-- User profile management
-- BMI calculation using adult reference categories
-- Authenticated BMI measurement history (create/list/latest/update/delete)
-- Date-filtered history, comparison, and trend statistics
-- Weight goals and goal progress
-- User settings (metric/imperial, notifications, theme)
-- Dashboard summary
-- Swagger UI at `/docs`
-- SQLite by default; PostgreSQL can be configured through `DATABASE_URL`
+- **User Authentication** — User registration and login with JWT-based authentication.
+- **User Profiles** — Retrieve and update personal profile information.
+- **BMI Calculation** — Calculate BMI and determine the corresponding health category.
+- **BMI History** — Save, retrieve, update, and delete BMI measurements.
+- **BMI Comparison** — Compare the latest measurement with previous records.
+- **Statistics** — Access BMI statistics and measurement insights.
+- **Goal Management** — Create, view, update, and delete personal goals.
+- **Goal Progress** — Track progress toward personal goals.
+- **User Settings** — Manage application preferences.
+- **Dashboard** — Retrieve summarized information for the application dashboard.
+- **Interactive API Documentation** — Explore and test endpoints through Swagger UI.
 
-> BMI is a screening measure, not a medical diagnosis. Adult BMI categories should not be applied to children and teens.
+## Technologies
 
-## 1. Create and activate a virtual environment (Windows PowerShell)
+- **Python**
+- **FastAPI**
+- **SQLAlchemy**
+- **SQLite**
+- **Pydantic**
+- **JWT Authentication**
+- **Uvicorn**
+
+## Project Structure
+
+```text
+BMI-Calculator-API/
+│
+├── app/
+│   ├── api/
+│   │   ├── routes/
+│   │   │   ├── auth.py
+│   │   │   ├── bmi.py
+│   │   │   ├── dashboard.py
+│   │   │   ├── goals.py
+│   │   │   ├── settings.py
+│   │   │   └── users.py
+│   │   └── deps.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   └── security.py
+│   │
+│   ├── database/
+│   │   └── database.py
+│   │
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   └── main.py
+│
+├── tests/
+├── .env.example
+├── .gitignore
+├── requirements.txt
+└── README.md
+```
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ARK13-org/BMI-Calculator-API.git
+cd BMI-Calculator-API
+```
+
+### 2. Create a Virtual Environment
+
+**Windows:**
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-If PowerShell blocks activation for this terminal session:
+**Linux / macOS:**
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-## 2. Install dependencies
+### 3. Install Dependencies
 
-```powershell
-python -m pip install --upgrade pip
+```bash
 pip install -r requirements.txt
 ```
 
-## 3. Configure environment
+### 4. Configure Environment Variables
 
-```powershell
-Copy-Item .env.example .env
+Create a `.env` file in the project root using `.env.example` as a template.
+
+Example configuration:
+
+```env
+APP_NAME=BMI Calculator API
+API_V1_PREFIX=/api/v1
+DATABASE_URL=sqlite:///./bmi_calculator.db
+SECRET_KEY=your-secure-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ALGORITHM=HS256
+CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:5500
 ```
 
-Change `SECRET_KEY` in `.env` to a long random value before using the API beyond local development.
+**Important:** Replace the example secret key with a secure, randomly generated value. Never commit your actual `.env` file or production secrets to GitHub.
 
-## 4. Run the API
+### 5. Run the Application
 
-Run from the project root:
-
-```powershell
+```bash
 python -m uvicorn app.main:app --reload
 ```
 
-- API root: http://127.0.0.1:8000/
-- Swagger docs: http://127.0.0.1:8000/docs
-- Health check: http://127.0.0.1:8000/health
+The API will be available at:
 
-The SQLite database is created automatically on first startup.
+```text
+http://127.0.0.1:8000
+```
 
-## Authentication
+## API Documentation
 
-Register or log in through `/api/v1/auth/register` or `/api/v1/auth/login`. Copy the returned `access_token`, click **Authorize** in Swagger, and paste the token. The API uses HTTP Bearer authentication.
+FastAPI automatically generates interactive API documentation.
 
-## Main endpoints
+| Documentation | URL |
+|---|---|
+| Swagger UI | http://127.0.0.1:8000/docs |
+| ReDoc | http://127.0.0.1:8000/redoc |
 
-| Method | Endpoint | Auth |
+You can explore endpoints, provide request data, and test API functionality directly from Swagger UI.
+
+## API Endpoints
+
+All API routes use the `/api/v1` prefix.
+
+### Authentication
+
+| Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/v1/auth/register` | No |
-| POST | `/api/v1/auth/login` | No |
-| GET | `/api/v1/auth/me` | Yes |
-| GET/PATCH | `/api/v1/users/profile` | Yes |
-| DELETE | `/api/v1/users/account` | Yes |
-| POST | `/api/v1/bmi/calculate` | No |
-| POST | `/api/v1/bmi/records` | Yes |
-| GET | `/api/v1/bmi/records` | Yes |
-| GET | `/api/v1/bmi/latest` | Yes |
-| GET | `/api/v1/bmi/compare` | Yes |
-| GET | `/api/v1/bmi/statistics` | Yes |
-| PATCH/DELETE | `/api/v1/bmi/records/{record_id}` | Yes |
-| GET | `/api/v1/dashboard` | Yes |
-| GET/POST | `/api/v1/goals` | Yes |
-| PATCH/DELETE | `/api/v1/goals/{goal_id}` | Yes |
-| GET | `/api/v1/goals/progress` | Yes |
-| GET/PATCH | `/api/v1/settings` | Yes |
+| POST | `/auth/register` | Register a new account |
+| POST | `/auth/login` | Authenticate a user |
 
-## Flutter connection notes
+### Users
 
-- Android emulator: use `http://10.0.2.2:8000/api/v1` (not `localhost`).
-- Flutter web / desktop on the same computer: use `http://127.0.0.1:8000/api/v1`.
-- Physical Android device: use your computer's LAN IPv4 address and allow port 8000 through the firewall.
-- Send `Authorization: Bearer <access_token>` for protected endpoints.
-- The current Flutter mock record model maps to `id`, `height_cm`, `weight_kg`, `bmi`, and `measured_at`. The API also returns `category` and `note`.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/users/profile` | Retrieve user profile |
+| PATCH | `/users/profile` | Update user profile |
 
-## Database changes
+### BMI
 
-This starter uses SQLAlchemy `create_all` for initial local development. For future schema changes on an existing database, add Alembic migrations rather than expecting `create_all` to alter existing tables.
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/bmi/calculate` | Calculate BMI |
+| GET | `/bmi/records` | Retrieve BMI history |
+| POST | `/bmi/records` | Create a BMI record |
+| PATCH | `/bmi/records/{id}` | Update a BMI record |
+| DELETE | `/bmi/records/{id}` | Delete a BMI record |
+| GET | `/bmi/latest` | Retrieve latest BMI record |
+| GET | `/bmi/compare` | Compare BMI measurements |
+| GET | `/bmi/statistics` | Retrieve BMI statistics |
+
+### Goals
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/goals` | Retrieve goals |
+| POST | `/goals` | Create a goal |
+| GET | `/goals/progress` | Retrieve goal progress |
+| PATCH | `/goals/{id}` | Update a goal |
+| DELETE | `/goals/{id}` | Delete a goal |
+
+### Settings
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/settings` | Retrieve user settings |
+| PATCH | `/settings` | Update user settings |
+
+### Dashboard
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/dashboard` | Retrieve dashboard information |
+
+*Note: Authentication is required for protected endpoints. Refer to `/docs` for the exact request and response schemas.*
+
+## Database
+
+The project uses **SQLite** as its default database, with SQLAlchemy handling database operations and ORM models.
+
+The database URL can be configured through the `DATABASE_URL` environment variable.
+
+## Frontend Integration
+
+This API was developed to serve a Flutter-based BMI Calculator application.
+
+The Flutter frontend communicates with the backend through REST API requests and supports:
+
+- Account registration and login.
+- Profile management.
+- BMI calculations and measurement history.
+- BMI charts and comparisons.
+- Goal tracking.
+- User preferences.
+
+## License
+
+This project is open-source. See the repository for licensing information.
